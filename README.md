@@ -85,3 +85,18 @@ createApp(App).mount("#container");
 - $attrs
 - $parent/$refs
 - 路由参数 query-params-meta
+
+7. 生命周期
+
+```js
+beforeCreate;
+created;
+beforeMount;
+mounted;
+beforeUpdate;
+updated;
+beforeDestroy--beforeUnmount;
+destroyed--unmounted;
+activated
+deactivated
+```
