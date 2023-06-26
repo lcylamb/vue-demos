@@ -73,3 +73,15 @@ createApp(App).mount("#container");
   - 给当前组件每个 dom 元素添加一个自定义属性 <div data-v-7a7a37b1></div>
   - 给当前组件每个样式类名添加自定义样式属性 `.con[data-v-7a7a37b1]`
   - 也作用于子组件的根标签，如果没有根标签，则对子组件没有任何影响
+
+6. Vue3 组件通讯
+
+- props 父-子
+- 自定义事件 子-父
+- v-model 父<->子
+- 插槽
+- vuex/pinia 任意组件
+- provide/inject
+- $attrs
+- $parent/$refs
+- 路由参数 query-params-meta
