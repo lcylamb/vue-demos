@@ -122,3 +122,5 @@ const store = creaStore({
 });
 createApp(App).use(store).mount("#app");
 ```
+
+mode
