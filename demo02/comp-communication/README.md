@@ -124,3 +124,4 @@ createApp(App).use(store).mount("#app");
 ```
 
 mode
+aaa
