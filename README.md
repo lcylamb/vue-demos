@@ -230,6 +230,97 @@ const store = creaStore({
 createApp(App).use(store).mount("#app");
 ```
 
+6. provide/inject
+
+- 作用：逐级透传
+- 注入的数据**不是响应式**的（可以改变）
+
+- 祖先组件提供数据
+
+```js
+// 祖先组件使用数据
+<p>{{_.provides.count}}</p>
+provide: {
+  count: 1;
+}
+// 提供的数据依赖于data中的数据
+provide(){
+   return {
+      count:this.count
+   }
+}
+// 为整个应用层提供依赖---用于编写插件
+const app = createApp(App)
+app.provide('count',1)
+```
+
+- 子孙组件注入
+  - 注入会在组件自身的状态之前被解析，因此可以在 data() 中访问到注入的属性
+
+```js
+inject: ["count"];
+data(){
+   return {
+      newCount:this.count
+   }
+}
+// 注入别名
+inject：{
+   localCount:{
+      from:'count'
+   }
+}
+// 注入默认值
+inject :{
+   localCount:{
+      from:'count',
+      default:222
+   }
+}
+```
+
+- 响应式的 provide+inject 使用`computed()`组合 API
+
+```js
+// 祖先组件
+import { computed} from 'vue'
+data(){
+   return {
+      msg:'hello',
+   }
+}
+provide:{
+   msg:computed(()=>this.msg)
+}
+// 后代组件
+inject：['msg']
+```
+
+- 使用 Symbol 作为注入名
+
+```js
+// key.ts
+export const myInjectKey = Symbol();
+// 祖先组件
+import {computed} from 'vue'
+import {myInjectKey} from './utils/key'
+data(){
+   return {
+      count:111
+   }
+}
+provide:{
+   [myInjectKey]:computed(()=>this.count)
+}
+// 后代组件
+import {myInjectKey} from './utils.key'
+inject:{
+   localKey:{
+      from:myInjectKey
+   }
+}
+```
+
 7. 生命周期
 
 ```js
