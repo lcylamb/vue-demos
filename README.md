@@ -1,13 +1,13 @@
 # Vue2 vs Vue3
 
-1. data
+## 1. data
 
 - **vue2** 的 data 有两种写法
   - 对象
   - 函数（组件只能使用函数写法）
 - **vue3** 的 data 只能为函数
 
-2. 响应式区别
+## 2. 响应式区别
 
 - **vue2** 使用 `Object.defineProperty` 实现响应式
   - 新增的数据不具有响应式
@@ -17,7 +17,7 @@
   - 因此 **vue3** 不需要`$set` 方法，删除了`$set`
   - vue3 响应式使用的是 `Proxy`
 
-3. **vue3** 可以有多个应用实例
+## 3. vue3 可以有多个应用实例
 
 ```js
 //main.js文件
@@ -25,7 +25,7 @@ createApp(App).mount("#app");
 createApp(App).mount("#container");
 ```
 
-4. 指令
+## 4. 指令
 
 - vue3 新增指令：`v-memo`缓存部分 DOM
 
@@ -37,7 +37,7 @@ createApp(App).mount("#container");
 - vue3 中 `v-if` 优先级高于 `v-for`
 - v-bind 删除`.sync`修饰符
 
-5. 动态样式
+## 5. 动态样式
 
 - vue3 新增
 
@@ -74,38 +74,7 @@ createApp(App).mount("#container");
   - 给当前组件每个样式类名添加自定义样式属性 `.con[data-v-7a7a37b1]`
   - 也作用于子组件的根标签，如果没有根标签，则对子组件没有任何影响
 
-6. Vue3 组件通讯
-
-- props 父-子
-  - 和 vue2 一致
-  - 有三种写法
-  ```js
-  props:['count']
-  props:{
-    count:Number
-  }
-  props:{
-    count:{
-      type:Number,
-      required:true,
-      default:1
-    }
-  }
-  ```
-- 自定义事件 子-父
-  - 在 vue3 中给组件绑定事件默认是原生事件
-    1. 组件有根标签
-    2. 绑定的是原生 DOM 事件
-    3. 如果不是原生 DOM 事件依然被认定为自定义事件，使用触发自定义事件方式触发
-    4. 移除了`.native` 修饰符
-- v-model 父<->子
-- 插槽
-- vuex/pinia 任意组件
-- provide/inject
-- $attrs
-- $parent/$refs
-- 路由参数 query-params-meta
-  组件通讯（详）
+## 6. Vue3 组件通讯
 
 1. props
 
@@ -125,6 +94,11 @@ props:{
 
 2. 自定义事件
 
+- 在 vue3 中给组件绑定事件默认是原生事件
+  1. 组件有根标签
+  2. 绑定的是原生 DOM 事件
+  3. 如果不是原生 DOM 事件依然被认定为自定义事件，使用触发自定义事件方式触发
+  4. 移除了`.native` 修饰符
 - Vue3 中如果给组件绑定了原生的 DOM 事件，并且组件有根标签，则为原生事件，否则依然是自定义事件
 - 子组件用 emits 接收自定义事件
 
@@ -321,7 +295,20 @@ inject:{
 }
 ```
 
-7. 生命周期
+7. $attrs
+
+- 透传 Attributes
+- 接收 子组件没有被 props 或 emits 的属性和自定义事件
+- 插件开发中常用
+
+```js
+// 祖先组件
+<Demo :count="count" @update="update"></Demo>
+// 后代组件
+
+```
+
+## 7. 生命周期
 
 ```js
 beforeCreate;
@@ -336,6 +323,121 @@ activated
 deactivated
 ```
 
-修改了这里
+## 8. 组合式 Api
 
-再次修改
+## 9. pinia
+
+- pinia 只有 state、getters、actions，没有 mutations
+- 不需要汇总模块
+- pinia 数据是可读可写的
+- 有强大的类型推论，对 TS 支持比较友好
+
+1. 创建 pinia
+
+```js
+// store/index.ts
+import { createPinia } from "pinia";
+export default createPinia();
+// main.ts
+import store from "./store";
+createApp(App).use(store).mount("#app");
+```
+
+2. 其他模块
+
+```js
+import { defineStore } from "pinia";
+export const useUserStore = defineStore("user", {
+  state: () => {
+    return {
+      user: {
+        userName: "zs",
+        age: 18,
+      },
+    };
+  },
+  getters: {
+    isAdult(state) {
+      return state.user.age >= 18 ? "成年" : "未成年";
+    },
+  },
+  actions: {
+    addAge() {
+      this.user.age++;
+    },
+  },
+});
+```
+
+3. 组件中使用
+
+- pinia 实现模块中数据代理，因此可以直接访问模块的 state、getters、actions
+- 如果需要发送请求，就在 actions 中发送请求和更新数据
+- 如果不发送请求
+  - 只更新一个数据，可以直接操作
+  - 同时更新多个数据，使用$patch
+
+```js
+<template>
+   <p>{{userStore.user.userName}}</p>
+   <p>{{userStore.user.age}}</p>
+   <button @click="addAge">addAge</button>
+   <button @click="subAge">subAge</button>
+   <button @click="changeMult">changeMult</button>
+</template>
+import {useUserStore} from './store/modules/user'
+const userStore = useUserStore();
+const addAge = ()=>{
+   userStore.addAge();
+}
+const subAge = ()=>{
+   userStore.user.age --
+}
+const changeMult  =()=>{
+   userStore.$patch({
+      age:userStore.age+5,
+      uerName:'ls'
+   })
+}
+```
+
+## 10. vue-router
+
+- 用`createRouter`创建
+- 路由模式属性由`mode`-->`history`,调用`createWebHistory`表示使用 history 模式，`createWebHashHistory`表示 hash 模式
+- 选项式 API 开发使用没有变化
+- 在组合式开发中要使用 hooks 函数
+
+```js
+import { createRouter } from "vue-router";
+const router = createRouter([
+  {
+    path: "/",
+    component: () => import("@/views/Home/index.vue"),
+    name: "Home",
+    meta: { title: "首页" },
+    children: [],
+  },
+]);
+export default router;
+// main.ts
+createApp(App).use(router).mount("#app");
+// App
+<tempalte>
+  <p></p>
+</tempalte>;
+import { useRouter, useRoute } from "vue-router";
+const router = useRouter();
+const route = useRoute();
+router.push() / replace();
+route.path / params / query / meta;
+```
+
+## 11. 路由模式
+
+- hash 模式
+  - `window.onhashChange`监听路由地址,根据路径地址(hash 值)呈现响应页面内容
+- history 模式
+  - 基于`window.history.pushState()/replaceState()`
+  - history 刷新会 404
+    - 在 index.html 中使用绝对路径
